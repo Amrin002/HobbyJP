@@ -1,0 +1,283 @@
+:root {
+    /* Warna Dasar yang Konsisten */
+    --bg-body: #0f172a;
+    /* Navy sangat gelap */
+    --bg-card: #1e293b;
+    /* Navy sedikit terang untuk kartu */
+    --bg-element: #334155;
+    /* Warna untuk placeholder gambar */
+
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+
+    --accent-primary: #3b82f6;
+    /* Satu warna aksen utama (Biru) */
+    --accent-hover: #2563eb;
+    --accent-rating: #fbbf24;
+}
+
+body {
+    background-color: var(--bg-body);
+    color: var(--text-primary);
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    line-height: 1.6;
+}
+
+/* Navbar Clean */
+.navbar {
+    background-color: var(--bg-body);
+    border-bottom: 1px solid var(--bg-element);
+    padding: 1rem 0;
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: var(--text-primary) !important;
+}
+
+.navbar-brand i {
+    color: var(--accent-primary);
+}
+
+.nav-link {
+    color: var(--text-secondary) !important;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.nav-link:hover,
+.nav-link.active {
+    color: var(--text-primary) !important;
+}
+
+/* Hero Section Flat */
+.hero-section {
+    background-color: var(--bg-card);
+    border: 1px solid var(--bg-element);
+    border-radius: 16px;
+    padding: 60px 40px;
+    margin: 30px 0;
+    position: relative;
+    /* Dihapus: Gradiasi dan SVG pattern */
+}
+
+.hero-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 15px;
+    line-height: 1.2;
+}
+
+.hero-description {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    margin-bottom: 30px;
+    max-width: 600px;
+}
+
+/* Buttons Flat */
+.btn-primary {
+    background-color: var(--accent-primary);
+    border: none;
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+.btn-primary:hover {
+    background-color: var(--accent-hover);
+}
+
+.btn-outline-light {
+    border: 1px solid var(--bg-element);
+    color: var(--text-secondary);
+    background: transparent;
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+.btn-outline-light:hover {
+    background-color: var(--bg-element);
+    color: var(--text-primary);
+    border-color: var(--bg-element);
+}
+
+/* Category Buttons */
+.cat-btn {
+    background-color: var(--bg-card);
+    border: 1px solid var(--bg-element);
+    color: var(--text-secondary);
+    margin-right: 8px;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.cat-btn:hover {
+    background-color: var(--bg-element);
+    color: var(--text-primary);
+}
+
+.section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 25px;
+    display: flex;
+    align-items: center;
+    color: var(--text-primary);
+}
+
+.section-title i {
+    color: var(--accent-primary);
+    margin-right: 12px;
+}
+
+/* Content Card Clean */
+.content-card {
+    background-color: transparent;
+    /* Hilangkan background card agar lebih minimalis */
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.2s;
+    height: 100%;
+}
+
+.content-card:hover {
+    transform: translateY(-5px);
+}
+
+.content-card:hover .content-title {
+    color: var(--accent-primary);
+}
+
+.content-img {
+    width: 100%;
+    height: 280px;
+    /* Sedikit dipendekkan */
+    object-fit: cover;
+    /* Dihapus: Gradiasi warna-warni */
+    background-color: var(--bg-element);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    color: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    margin-bottom: 12px;
+}
+
+.content-body {
+    padding: 0 5px;
+}
+
+.content-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: var(--text-primary);
+    transition: color 0.2s;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.content-category {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 5px;
+    display: block;
+}
+
+.rating {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.rating i {
+    color: var(--accent-rating);
+}
+
+/* Latest Card Clean */
+.latest-card {
+    background-color: var(--bg-card);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 15px;
+    display: flex;
+    gap: 20px;
+    transition: border-color 0.2s;
+}
+
+.latest-card:hover {
+    border-color: var(--bg-element);
+}
+
+.latest-img {
+    width: 70px;
+    height: 90px;
+    border-radius: 8px;
+    /* Dihapus: Gradiasi warna-warni */
+    background-color: var(--bg-element);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
+}
+
+.latest-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.latest-title {
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 6px;
+    color: var(--text-primary);
+}
+
+.latest-meta {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.badge-status {
+    font-size: 0.7rem;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+/* Footer Clean */
+footer {
+    background-color: var(--bg-body);
+    border-top: 1px solid var(--bg-element);
+    padding: 60px 0 30px;
+    margin-top: 80px;
+}
+
+.footer-link {
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.2s;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.footer-link:hover {
+    color: var(--accent-primary);
+}
+
