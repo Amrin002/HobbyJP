@@ -27,7 +27,7 @@ This project is configured to run with [DDEV](https://ddev.readthedocs.io/).
 
 2.  **Clone the repository:**
     ```bash
-    git clone <repository-url>
+    git clone https://github.com/Amrin002/HobbyJP.git
     cd HobbyJP
     ```
 
