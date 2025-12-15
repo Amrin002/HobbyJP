@@ -1,9 +1,5 @@
 RewriteEngine On
-
-# Izinkan akses langsung ke file statis (CSS, JS, Images)
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
-
-# Redirect semua request lain ke public/index.php
 RewriteRule ^(.*)$ public/index.php [QSA,L]

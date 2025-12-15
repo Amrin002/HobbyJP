@@ -1,4 +1,5 @@
 <?php
+session_start();
 include '../include/koneksi.php';
 
 // Get content ID from URL
@@ -24,6 +25,19 @@ $content = mysqli_fetch_assoc($result_content);
 if (!$content) {
     header('Location: index.php');
     exit;
+}
+
+// Check if user already rated this content
+$user_rating = 0;
+if (isset($_SESSION['user_id'])) {
+    $query_user_rating = "SELECT rating FROM ratings WHERE id_user = ? AND id_content = ?";
+    $stmt_user_rating = mysqli_prepare($conn, $query_user_rating);
+    mysqli_stmt_bind_param($stmt_user_rating, "ii", $_SESSION['user_id'], $id_content);
+    mysqli_stmt_execute($stmt_user_rating);
+    $result_user_rating = mysqli_stmt_get_result($stmt_user_rating);
+    if ($row = mysqli_fetch_assoc($result_user_rating)) {
+        $user_rating = $row['rating'];
+    }
 }
 
 // Get episodes
@@ -53,6 +67,72 @@ mysqli_stmt_bind_param($stmt_update, "i", $id_content);
 mysqli_stmt_execute($stmt_update);
 ?>
 <?php include '../page/header.php'; ?>
+
+<style>
+    .rating-container {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 15px;
+        background-color: var(--bg-card);
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+
+    .rating-stars {
+        display: flex;
+        gap: 5px;
+    }
+
+    .star {
+        font-size: 1.5rem;
+        color: #4a5568;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .star.active,
+    .star:hover {
+        color: var(--accent-gold);
+        transform: scale(1.1);
+    }
+
+    .star.hover-effect {
+        color: var(--accent-gold);
+    }
+
+    .rating-text {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+    }
+
+    .rating-login-prompt {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+    }
+
+    .rating-login-prompt a {
+        color: var(--accent-blue);
+        text-decoration: none;
+    }
+
+    .rating-login-prompt a:hover {
+        text-decoration: underline;
+    }
+
+    .user-rating-display {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 15px;
+        background-color: rgba(59, 130, 246, 0.1);
+        border-radius: 8px;
+    }
+
+    .user-rating-display i {
+        color: var(--accent-gold);
+    }
+</style>
 
 <div class="container mt-4">
     <!-- Breadcrumb -->
@@ -89,7 +169,7 @@ mysqli_stmt_execute($stmt_update);
 
             <div class="d-flex align-items-center gap-4 mb-4">
                 <div class="d-flex align-items-center gap-2">
-                    <i class="bi bi-star-fill" style="color: var(--accent-rating);"></i>
+                    <i class="bi bi-star-fill" style="color: var(--accent-gold);"></i>
                     <span class="fw-bold"><?php echo number_format($content['average_rating'], 1); ?></span>
                     <span class="text-secondary">/5.0</span>
                 </div>
@@ -105,6 +185,40 @@ mysqli_stmt_execute($stmt_update);
                     <i class="bi bi-layers-fill text-secondary"></i>
                     <span class="text-secondary"><?php echo number_format($content['total_episode']); ?> episodes</span>
                 </div>
+            </div>
+
+            <!-- Rating Section -->
+            <div class="rating-container">
+                <?php if (isset($_SESSION['user_id'])): ?>
+                    <div>
+                        <div class="mb-2 fw-semibold">Your Rating:</div>
+                        <div class="rating-stars" id="rating-stars">
+                            <?php for ($i = 1; $i <= 5; $i++): ?>
+                                <i class="bi bi-star-fill star <?php echo $i <= $user_rating ? 'active' : ''; ?>"
+                                    data-rating="<?php echo $i; ?>"></i>
+                            <?php endfor; ?>
+                        </div>
+                        <div class="rating-text mt-2" id="rating-message">
+                            <?php if ($user_rating > 0): ?>
+                                You rated this <?php echo $user_rating; ?> out of 5 stars
+                            <?php else: ?>
+                                Click on stars to rate
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    <?php if ($user_rating > 0): ?>
+                        <div class="ms-auto">
+                            <button class="btn btn-sm btn-outline-danger" id="remove-rating">
+                                <i class="bi bi-trash"></i> Remove Rating
+                            </button>
+                        </div>
+                    <?php endif; ?>
+                <?php else: ?>
+                    <div class="rating-login-prompt">
+                        <i class="bi bi-star text-warning"></i>
+                        Please <a href="login.php?redirect=<?php echo urlencode($_SERVER['REQUEST_URI']); ?>">login</a> to rate this content
+                    </div>
+                <?php endif; ?>
             </div>
 
             <div class="d-flex gap-3 mb-4">
@@ -190,5 +304,111 @@ mysqli_stmt_execute($stmt_update);
         </div>
     <?php endif; ?>
 </div>
+
+<?php if (isset($_SESSION['user_id'])): ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const stars = document.querySelectorAll('.star');
+            const ratingMessage = document.getElementById('rating-message');
+            const removeButton = document.getElementById('remove-rating');
+
+            // Hover effect
+            stars.forEach((star, index) => {
+                star.addEventListener('mouseenter', function() {
+                    stars.forEach((s, i) => {
+                        if (i <= index) {
+                            s.classList.add('hover-effect');
+                        } else {
+                            s.classList.remove('hover-effect');
+                        }
+                    });
+                });
+
+                star.addEventListener('mouseleave', function() {
+                    stars.forEach(s => s.classList.remove('hover-effect'));
+                });
+
+                // Click to rate
+                star.addEventListener('click', function() {
+                    const rating = parseInt(this.getAttribute('data-rating'));
+                    submitRating(rating);
+                });
+            });
+
+            // Remove rating
+            if (removeButton) {
+                removeButton.addEventListener('click', function() {
+                    if (confirm('Are you sure you want to remove your rating?')) {
+                        removeRating();
+                    }
+                });
+            }
+
+            function submitRating(rating) {
+                fetch('ajax/submit_rating.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            id_content: <?php echo $id_content; ?>,
+                            rating: rating
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Update stars
+                            stars.forEach((s, i) => {
+                                if (i < rating) {
+                                    s.classList.add('active');
+                                } else {
+                                    s.classList.remove('active');
+                                }
+                            });
+
+                            // Update message
+                            ratingMessage.textContent = `You rated this ${rating} out of 5 stars`;
+
+                            // Reload page to update stats
+                            setTimeout(() => {
+                                location.reload();
+                            }, 1000);
+                        } else {
+                            alert(data.message || 'Failed to submit rating');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred while submitting your rating');
+                    });
+            }
+
+            function removeRating() {
+                fetch('ajax/remove_rating.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            id_content: <?php echo $id_content; ?>
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            location.reload();
+                        } else {
+                            alert(data.message || 'Failed to remove rating');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred while removing your rating');
+                    });
+            }
+        });
+    </script>
+<?php endif; ?>
 
 <?php include '../page/footer.php'; ?>

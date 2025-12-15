@@ -1,0 +1,12 @@
+[2025-12-16 00:20:30] debug logging
+[2025-12-16 00:20:30] POST: []
+[2025-12-16 00:20:30] SESSION: {"user_id":2,"username":"Amza","email":"amza@gmail.com","login_time":1765812030}
+[2025-12-16 00:20:30] ERROR: Invalid request method
+[2025-12-16 00:20:40] debug logging
+[2025-12-16 00:20:40] POST: []
+[2025-12-16 00:20:40] SESSION: {"user_id":2,"username":"Amza","email":"amza@gmail.com","login_time":1765812040}
+[2025-12-16 00:20:40] ERROR: Invalid request method
+[2025-12-16 00:20:54] debug logging
+[2025-12-16 00:20:54] POST: []
+[2025-12-16 00:20:54] SESSION: {"user_id":2,"username":"Amza","email":"amza@gmail.com","login_time":1765812054}
+[2025-12-16 00:20:54] ERROR: Invalid request method
