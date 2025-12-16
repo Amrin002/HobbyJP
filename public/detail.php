@@ -29,6 +29,7 @@ if (!$content) {
 
 // Check if user already rated this content
 $user_rating = 0;
+$user_bookmarked = false;
 if (isset($_SESSION['user_id'])) {
     $query_user_rating = "SELECT rating FROM ratings WHERE id_user = ? AND id_content = ?";
     $stmt_user_rating = mysqli_prepare($conn, $query_user_rating);
@@ -37,6 +38,16 @@ if (isset($_SESSION['user_id'])) {
     $result_user_rating = mysqli_stmt_get_result($stmt_user_rating);
     if ($row = mysqli_fetch_assoc($result_user_rating)) {
         $user_rating = $row['rating'];
+    }
+
+    // Check if user bookmarked this content
+    $query_user_bookmark = "SELECT id_bookmark FROM bookmarks WHERE id_user = ? AND id_content = ?";
+    $stmt_user_bookmark = mysqli_prepare($conn, $query_user_bookmark);
+    mysqli_stmt_bind_param($stmt_user_bookmark, "ii", $_SESSION['user_id'], $id_content);
+    mysqli_stmt_execute($stmt_user_bookmark);
+    $result_user_bookmark = mysqli_stmt_get_result($stmt_user_bookmark);
+    if (mysqli_num_rows($result_user_bookmark) > 0) {
+        $user_bookmarked = true;
     }
 }
 
@@ -179,7 +190,8 @@ mysqli_stmt_execute($stmt_update);
                 </div>
                 <div class="d-flex align-items-center gap-2">
                     <i class="bi bi-bookmark-fill text-secondary"></i>
-                    <span class="text-secondary"><?php echo number_format($content['total_bookmark']); ?> bookmarks</span>
+                    <span class="text-secondary" id="bookmark-count"><?php echo number_format($content['total_bookmark']); ?></span>
+                    <span class="text-secondary"> bookmarks</span>
                 </div>
                 <div class="d-flex align-items-center gap-2">
                     <i class="bi bi-layers-fill text-secondary"></i>
@@ -225,9 +237,21 @@ mysqli_stmt_execute($stmt_update);
                 <button class="btn btn-primary">
                     <i class="bi bi-play-fill"></i> Read Now
                 </button>
-                <button class="btn btn-outline-light">
-                    <i class="bi bi-bookmark"></i> Bookmark
-                </button>
+                <?php if (isset($_SESSION['user_id'])): ?>
+                    <?php if ($user_bookmarked): ?>
+                        <button class="btn btn-success" id="bookmark-btn" data-bookmarked="1">
+                            <i class="bi bi-bookmark-fill"></i> Bookmarked
+                        </button>
+                    <?php else: ?>
+                        <button class="btn btn-outline-light" id="bookmark-btn" data-bookmarked="0">
+                            <i class="bi bi-bookmark"></i> Bookmark
+                        </button>
+                    <?php endif; ?>
+                <?php else: ?>
+                    <a href="login.php?redirect=<?php echo urlencode($_SERVER['REQUEST_URI']); ?>" class="btn btn-outline-light">
+                        <i class="bi bi-bookmark"></i> Bookmark
+                    </a>
+                <?php endif; ?>
                 <button class="btn btn-outline-light">
                     <i class="bi bi-share"></i> Share
                 </button>
@@ -312,6 +336,10 @@ mysqli_stmt_execute($stmt_update);
             const ratingMessage = document.getElementById('rating-message');
             const removeButton = document.getElementById('remove-rating');
 
+            // Bookmark elements
+            const bookmarkBtn = document.getElementById('bookmark-btn');
+            const bookmarkCountEl = document.getElementById('bookmark-count');
+
             // Hover effect
             stars.forEach((star, index) => {
                 star.addEventListener('mouseenter', function() {
@@ -382,6 +410,69 @@ mysqli_stmt_execute($stmt_update);
                         console.error('Error:', error);
                         alert('An error occurred while submitting your rating');
                     });
+            }
+
+            // Bookmark handling
+            if (bookmarkBtn) {
+                bookmarkBtn.addEventListener('click', function() {
+                    const isBookmarked = this.getAttribute('data-bookmarked') === '1';
+
+                    if (isBookmarked) {
+                        // Remove
+                        fetch('ajax/remove_bookmark.php', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                    id_content: <?php echo $id_content; ?>
+                                })
+                            })
+                            .then(r => r.json())
+                            .then(data => {
+                                if (data.success) {
+                                    bookmarkBtn.classList.remove('btn-success');
+                                    bookmarkBtn.classList.add('btn-outline-light');
+                                    bookmarkBtn.innerHTML = '<i class="bi bi-bookmark"></i> Bookmark';
+                                    bookmarkBtn.setAttribute('data-bookmarked', '0');
+                                    if (bookmarkCountEl) bookmarkCountEl.textContent = data.total_bookmark;
+                                } else {
+                                    alert(data.message || 'Failed to remove bookmark');
+                                }
+                            })
+                            .catch(err => {
+                                console.error(err);
+                                alert('Error removing bookmark');
+                            });
+                    } else {
+                        // Add
+                        fetch('ajax/submit_bookmark.php', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                    id_content: <?php echo $id_content; ?>
+                                })
+                            })
+                            .then(r => r.json())
+                            .then(data => {
+                                if (data.success) {
+                                    bookmarkBtn.classList.remove('btn-outline-light');
+                                    bookmarkBtn.classList.add('btn-success');
+                                    bookmarkBtn.innerHTML = '<i class="bi bi-bookmark-fill"></i> Bookmarked';
+                                    bookmarkBtn.setAttribute('data-bookmarked', '1');
+                                    if (bookmarkCountEl) bookmarkCountEl.textContent = data.total_bookmark;
+                                } else {
+                                    alert(data.message || 'Failed to add bookmark');
+                                }
+                            })
+                            .catch(err => {
+                                console.error(err);
+                                alert('Error adding bookmark');
+                            });
+                    }
+                });
             }
 
             function removeRating() {
