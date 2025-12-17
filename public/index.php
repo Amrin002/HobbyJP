@@ -1,5 +1,5 @@
 <?php
-include '../include/koneksi.php';
+require_once __DIR__ . '/../include/koneksi.php';
 
 // Check if search query exists
 $search = isset($_GET['search']) ? trim($_GET['search']) : '';
